@@ -17,7 +17,15 @@ const headingFont = Noto_Serif_Thai({
 export const metadata: Metadata = {
   title: "SST INNOVATION | WebCraft Pro",
   description:
-    "Premium website and platform solutions by SST INNOVATION. Built for growth, performance, and credibility.",
+    "โซลูชันเว็บไซต์องค์กรระดับพรีเมียมโดย SST INNOVATION / Premium enterprise website solutions by SST INNOVATION.",
+  openGraph: {
+    title: "SST INNOVATION | WebCraft Pro",
+    description:
+      "โซลูชันเว็บไซต์องค์กรระดับพรีเมียมโดย SST INNOVATION / Premium enterprise website solutions by SST INNOVATION.",
+    locale: "th_TH",
+    alternateLocale: ["en_US"],
+    type: "website",
+  },
 };
 
 export default function RootLayout({
