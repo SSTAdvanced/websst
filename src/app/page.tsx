@@ -27,6 +27,7 @@ export default function Home() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle"
   );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -69,21 +70,38 @@ export default function Home() {
     if (status === "loading") return;
 
     setStatus("loading");
+    setErrorMessage(null);
 
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, locale: lang }),
       });
 
-      if (!response.ok) {
-        throw new Error("Request failed");
+      const data = (await response.json().catch(() => null)) as
+        | { ok: boolean; error?: string }
+        | null;
+
+      if (!response.ok || !data?.ok) {
+        setErrorMessage(
+          data?.error ||
+            (lang === "th"
+              ? "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
+              : "Submission failed. Please try again.")
+        );
+        setStatus("error");
+        return;
       }
 
       setFormData({ name: "", phone: "", email: "", message: "" });
       setStatus("success");
     } catch (error) {
+      setErrorMessage(
+        lang === "th"
+          ? "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
+          : "Submission failed. Please try again."
+      );
       setStatus("error");
     }
   };
@@ -404,9 +422,10 @@ export default function Home() {
                     ) : null}
                     {status === "error" ? (
                       <p className="text-sm text-rose-600">
-                        {lang === "th"
-                          ? "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
-                          : "Submission failed. Please try again."}
+                        {errorMessage ||
+                          (lang === "th"
+                            ? "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
+                            : "Submission failed. Please try again.")}
                       </p>
                     ) : null}
                   </form>
