@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { sendLeadNotification } from "@/lib/email";
-import { getSupabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 type LeadPayload = {
   name: string;
@@ -43,48 +42,26 @@ export async function POST(request: Request) {
     );
   }
 
-  const supabaseServer = getSupabaseServer();
   const locale = payload.locale ?? "th";
 
-  const { error } = await supabaseServer.from("leads").insert({
+  const { error } = await supabaseAdmin.from("leads").insert({
     name,
     phone: payload.phone?.trim() || null,
     email: email || null,
     message,
     locale,
+    source: "contact_form",
   });
 
   if (error) {
-    const isColumnError =
-      error.code === "PGRST204" || /column/i.test(error.message || "");
-
-    if (isColumnError) {
-      const { error: fallbackError } = await supabaseServer.from("leads").insert({
-        "ชื่อ-นามสกุล": name,
-        เบอร์ติดต่อ: payload.phone?.trim() || null,
-        อีเมล์: email || null,
-        รายละเอียดที่ต้องการ: message,
-      });
-
-      if (fallbackError) {
-        return NextResponse.json({ ok: false, error: "Unable to save lead." }, { status: 500 });
-      }
-    } else {
-      return NextResponse.json({ ok: false, error: "Unable to save lead." }, { status: 500 });
-    }
-  }
-
-  const emailResult = await sendLeadNotification({
-    name,
-    phone: payload.phone?.trim() || null,
-    email: email || null,
-    message,
-    locale,
-  });
-
-  if (!emailResult.ok) {
+    console.error("Failed to insert lead", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
     return NextResponse.json(
-      { ok: false, error: emailResult.error ?? "Email notification failed." },
+      { ok: false, error: "Unable to save lead.", details: error },
       { status: 500 }
     );
   }
