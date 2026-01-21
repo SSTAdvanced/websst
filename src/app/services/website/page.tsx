@@ -279,18 +279,18 @@ export default async function WebsiteServicePage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <a
+              <Link
                 href="/#contact"
                 className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white"
               >
                 {data.cta.primary}
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/#contact"
                 className="rounded-full border border-slate-300 px-5 py-2 text-xs font-semibold text-slate-700"
               >
                 {data.cta.secondary}
-              </a>
+              </Link>
               <a
                 href="https://line.me/R/ti/p/@974qhtym"
                 className="rounded-full border border-slate-300 px-5 py-2 text-xs font-semibold text-slate-700"
@@ -386,18 +386,18 @@ export default async function WebsiteServicePage() {
             <ServiceLinks locale={locale} current="website" />
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
-            <a
+            <Link
               href="/#contact"
               className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white"
             >
               {data.cta.primary}
-            </a>
-            <a
+            </Link>
+            <Link
               href="/#contact"
               className="rounded-full border border-slate-300 px-5 py-2 text-xs font-semibold text-slate-700"
             >
               {data.cta.secondary}
-            </a>
+            </Link>
           </div>
         </div>
       </section>
