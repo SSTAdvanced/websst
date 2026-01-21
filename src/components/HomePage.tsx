@@ -13,10 +13,12 @@ import {
   Sparkles,
   Star,
 } from "lucide-react";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PlatformCard from "@/components/PlatformCard";
 import PackageCard from "@/components/PackageCard";
+import ServiceLinks from "@/components/ServiceLinks";
 import { getCopy, type Lang } from "@/lib/i18n";
 
 const featureIcons = [ShieldCheck, Sparkles, Award, Layers];
@@ -69,6 +71,171 @@ export default function HomePage() {
     lang === "th"
       ? "inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
       : "inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400";
+
+  const seoContent =
+    lang === "th"
+      ? {
+          h1: "ยกระดับธุรกิจของคุณ ด้วยเว็บไซต์และระบบบริหารธุรกิจครบวงจร",
+          sections: [
+            {
+              h2: "บริการรับทำเว็บไซต์ระดับมืออาชีพ",
+              intro: [
+                "SST INNOVATION ให้บริการ รับทำเว็บไซต์ สำหรับองค์กรและธุรกิจที่ต้องการภาพลักษณ์พรีเมียม เราเริ่มจากการวิเคราะห์แบรนด์ กลุ่มเป้าหมาย และเส้นทางลูกค้า เพื่อออกแบบโครงสร้างเว็บที่สื่อสารคุณค่าได้ชัดเจนและสร้างความน่าเชื่อถือในระยะยาว เป้าหมายของเราคือทำให้เว็บไซต์เป็นสินทรัพย์ทางธุรกิจ ไม่ใช่แค่หน้าสวย ๆ",
+                "ทุกโครงการของเราเน้นมาตรฐาน UX/UI ที่เข้าใจผู้ใช้งานจริง ความเร็วโหลดสูง รองรับ SEO และการแสดงผลบนทุกอุปกรณ์ พร้อมวางระบบที่ขยายได้ในอนาคต ไม่ว่าจะเป็นเว็บไซต์บริษัท เว็บไซต์ธุรกิจขนาดกลาง ไปจนถึงเว็บไซต์องค์กรที่มีหลายภาษาและหลายสาขา เมื่อคุณต้องการทีมมืออาชีพที่ดูแลทั้งกลยุทธ์และเทคนิค การ รับทำเว็บไซต์ กับ SST INNOVATION จะช่วยให้การเริ่มต้นเป็นระบบและคุ้มค่า",
+                "เรายังให้ความสำคัญกับเนื้อหาเชิงธุรกิจ ตั้งแต่โครงสร้างข้อความ การจัดลำดับข้อมูล ไปจนถึงการวาง Call-to-Action ที่เหมาะสม เพื่อให้เว็บไซต์ช่วยสร้างโอกาสทางการขายจริง ไม่ว่าจะเป็นการเก็บข้อมูลผู้สนใจ การสร้างความเชื่อมั่น หรือการนำเสนอข้อเสนอที่ชัดเจน ทีมของเราทำงานร่วมกับคุณอย่างใกล้ชิด เพื่อให้เว็บไซต์สะท้อนตัวตนของแบรนด์อย่างถูกต้อง",
+              ],
+              h3: [
+                {
+                  title: "เว็บไซต์บริษัท / เว็บไซต์ธุรกิจ",
+                  body: [
+                    "เราออกแบบเว็บไซต์บริษัทให้สอดคล้องกับภาพลักษณ์และจุดยืนของแบรนด์ พร้อมวางโครงสร้างเนื้อหาที่ชัดเจน ตั้งแต่หน้าแนะนำบริษัท บริการ ผลงาน ไปจนถึงช่องทางติดต่อ เพื่อให้ลูกค้าเชื่อมั่นและตัดสินใจง่ายขึ้น โครงสร้างถูกออกแบบให้รองรับการเติบโต การเพิ่มหน้าใหม่ และการขยายฟีเจอร์ในอนาคตอย่างเป็นระบบ",
+                  ],
+                },
+                {
+                  title: "ทีมงานมืออาชีพและการดูแลหลังการขาย",
+                  body: [
+                    "หลังส่งมอบ เรามีทีมดูแลระบบและปรับปรุงต่อเนื่อง ช่วยตรวจสอบประสิทธิภาพ ความปลอดภัย และการปรับแต่ง SEO อย่างสม่ำเสมอ เพื่อให้เว็บไซต์ของคุณทำงานได้เต็มศักยภาพ ทั้งในมุมภาพลักษณ์และผลลัพธ์เชิงธุรกิจ",
+                  ],
+                },
+              ],
+            },
+            {
+              h2: "โปรแกรมบริหารหอพักและรีสอร์ท",
+              intro: [
+                "สำหรับผู้ประกอบการที่ต้องการระบบจัดการที่แม่นยำและทันสมัย เรามี โปรแกรมบริหารหอพัก และ โปรแกรมบริหารรีสอร์ท ที่ช่วยจัดการห้องพัก สัญญา การชำระเงิน และรายงานได้ครบในระบบเดียว ลดงานเอกสารซ้ำซ้อน เพิ่มความโปร่งใส และทำให้การบริหารเป็นระบบมากขึ้น",
+                "เราออกแบบระบบให้เหมาะกับการใช้งานจริง ทั้งฝ่ายต้อนรับ ฝ่ายบัญชี และผู้บริหาร โดยเน้นความปลอดภัยของข้อมูล รองรับการสำรองข้อมูล และสามารถปรับแต่งให้เข้ากับกฎระเบียบหรือรูปแบบธุรกิจของคุณได้ ระบบของเราช่วยให้เจ้าของกิจการเห็นภาพรวมได้ทันที และตัดสินใจทางธุรกิจได้เร็วขึ้น",
+                "ไม่ว่าคุณจะดูแลหอพักรายเดือน รีสอร์ทแบบรายคืน หรือที่พักแบบผสม ระบบของเราถูกวางให้ยืดหยุ่น รองรับการกำหนดสิทธิ์ผู้ใช้งาน และการตรวจสอบย้อนหลังได้ครบถ้วน ช่วยลดความเสี่ยงในการทำงานและเพิ่มคุณภาพการให้บริการแก่ลูกค้า",
+              ],
+              h3: [
+                {
+                  title: "ระบบจัดการหอพักออนไลน์",
+                  body: [
+                    "ระบบจัดการหอพักออนไลน์ช่วยติดตามสถานะห้องพัก การต่อสัญญา การแจ้งชำระ และประวัติผู้เช่าอย่างเป็นระบบ ผู้ดูแลสามารถเข้าถึงข้อมูลที่จำเป็นได้ทันที ลดข้อผิดพลาดจากการจดบันทึกมือ พร้อมสร้างรายงานรายเดือนเพื่อวิเคราะห์รายได้และอัตราการเข้าพักได้อย่างแม่นยำ",
+                  ],
+                },
+                {
+                  title: "ระบบบริหารรีสอร์ทแบบครบวงจร",
+                  body: [
+                    "สำหรับรีสอร์ทและที่พักแบบหลายประเภท เราวางระบบที่รองรับการกำหนดราคาแบบยืดหยุ่น การบริหารโปรโมชั่น และการเชื่อมต่อช่องทางการจองต่าง ๆ ช่วยให้ทีมงานทำงานร่วมกันได้ง่ายขึ้น และยกระดับประสบการณ์ของลูกค้าให้ดีขึ้นอย่างต่อเนื่อง",
+                  ],
+                },
+              ],
+            },
+            {
+              h2: "บริการจดทะเบียนบริษัทครบวงจร",
+              intro: [
+                "นอกจากงานด้านดิจิทัล เรายังมีบริการ จดทะเบียนบริษัท ที่ดูแลครบตั้งแต่ขั้นตอนเริ่มต้น ให้คำปรึกษาเรื่องชื่อบริษัท วัตถุประสงค์ และเอกสารที่เกี่ยวข้อง ช่วยลดภาระของผู้ประกอบการใหม่ ทำให้การเริ่มต้นธุรกิจเป็นเรื่องง่ายและเป็นระบบ",
+                "เราทำงานร่วมกับทีมที่เชี่ยวชาญเรื่องกฎหมายธุรกิจ เพื่อให้กระบวนการถูกต้องตามข้อกำหนด พร้อมให้คำแนะนำเรื่องการจัดโครงสร้างธุรกิจ การจัดการภาษี และการวางระบบเอกสารที่เหมาะสม ช่วยให้บริษัทของคุณเริ่มต้นอย่างมืออาชีพ",
+                "บริการของเราครอบคลุมทั้งการเตรียมเอกสาร การยื่นคำขอ และการติดตามผลอย่างเป็นระบบ ลดเวลาที่ผู้ประกอบการต้องใช้ในการประสานงานหลายฝ่าย พร้อมให้คำแนะนำเชิงธุรกิจเพื่อให้บริษัทใหม่พร้อมดำเนินงานอย่างถูกต้องตามกฎหมาย",
+              ],
+              h3: [
+                {
+                  title: "ที่ปรึกษาด้านการจดทะเบียนบริษัท",
+                  body: [
+                    "เราให้คำปรึกษาเชิงลึก เพื่อให้คุณเข้าใจขั้นตอนสำคัญของการจดทะเบียนบริษัท ไม่ว่าจะเป็นการจัดตั้งผู้ถือหุ้น การกำหนดทุนจดทะเบียน หรือการเตรียมเอกสารที่จำเป็น ช่วยลดความเสี่ยงและเพิ่มความมั่นใจตั้งแต่วันแรกของการดำเนินธุรกิจ",
+                  ],
+                },
+              ],
+            },
+            {
+              h2: "ทำไมต้องเลือก SST INNOVATION",
+              intro: [
+                "SST INNOVATION คือทีมผู้เชี่ยวชาญที่ทำงานแบบครบวงจร ตั้งแต่กลยุทธ์ดิจิทัล การออกแบบ การพัฒนา ไปจนถึงการดูแลหลังส่งมอบ เราเน้นความโปร่งใส คุณภาพ และผลลัพธ์เชิงธุรกิจ ด้วยประสบการณ์จากหลากหลายอุตสาหกรรม คุณจึงมั่นใจได้ว่าทุกโครงการจะถูกวางระบบอย่างมีมาตรฐาน",
+                "ไม่ว่าคุณต้องการ รับทำเว็บไซต์ ที่ยกระดับภาพลักษณ์ ต้องการ โปรแกรมบริหารหอพัก หรือ โปรแกรมบริหารรีสอร์ท ที่ลดต้นทุนการบริหาร หรือมองหาบริการ จดทะเบียนบริษัท ที่สะดวกและถูกต้อง ทีมของเราพร้อมดูแลครบทุกขั้นตอน พร้อมให้คำปรึกษาเพื่อให้ธุรกิจของคุณเติบโตอย่างยั่งยืน",
+                "เราวางกระบวนการทำงานที่ชัดเจน ตั้งแต่การเก็บความต้องการ การเสนอแผนงาน การพัฒนาและทดสอบ ไปจนถึงการส่งมอบและติดตามผลหลังใช้งานจริง คุณจะได้รับทั้งความมั่นใจในคุณภาพ และความยืดหยุ่นในการปรับปรุงตามเป้าหมายที่เปลี่ยนแปลง",
+              ],
+              h3: [
+                {
+                  title: "ทีมงานมืออาชีพและการดูแลหลังการขาย",
+                  body: [
+                    "ทีมของเรามีทั้งนักพัฒนา นักออกแบบ และที่ปรึกษาธุรกิจ ทำให้คุณได้รับคำแนะนำที่รอบด้าน พร้อมการดูแลหลังส่งมอบที่วัดผลได้จริง ทั้งการปรับปรุงประสิทธิภาพ การอัปเดตความปลอดภัย และการพัฒนาเพิ่มเติมตามเป้าหมายธุรกิจ",
+                  ],
+                },
+              ],
+            },
+          ],
+        }
+      : {
+          h1: "Elevate your business with full-service websites and business systems",
+          sections: [
+            {
+              h2: "Professional website development services",
+              intro: [
+                "SST INNOVATION delivers professional website development for brands that require premium positioning and measurable outcomes. We start with strategy, audience insights, and user journeys, then translate those into a structure that communicates value, builds trust, and converts visitors into customers. Your website becomes a business asset, not just a digital brochure.",
+                "Our builds emphasize performance, SEO readiness, and consistent experience across devices. We design systems that scale as your business grows, whether you need a corporate website, a multi-service business site, or a multilingual platform. If you are looking for a partner that combines strategy and technology, SST INNOVATION provides a reliable end-to-end website development service.",
+                "Content structure is part of the strategy. We help shape messaging, information hierarchy, and calls to action so that your website generates real business outcomes, from qualified inquiries to stronger brand credibility. Our team collaborates closely with you to ensure the final experience reflects your identity accurately.",
+              ],
+              h3: [
+                {
+                  title: "Corporate websites / business websites",
+                  body: [
+                    "We craft corporate and business websites that align with your brand identity and clarify your offerings. Clear navigation, strong messaging, and conversion-focused layouts help visitors understand your value quickly. The foundation is built to expand with new pages, features, and integrations as your organization evolves.",
+                  ],
+                },
+                {
+                  title: "Professional team and post-launch care",
+                  body: [
+                    "After launch, we provide ongoing care, performance monitoring, security updates, and SEO refinements. This ensures your website remains fast, secure, and effective as your business priorities change.",
+                  ],
+                },
+              ],
+            },
+            {
+              h2: "Dormitory and resort management systems",
+              intro: [
+                "For property operators, our dormitory and resort management systems simplify daily operations. Centralized management covers rooms, contracts, billing, and reporting in one place, reducing manual work and improving accuracy. The result is better visibility and faster decisions.",
+                "We design these systems with real-world workflows in mind for reception, accounting, and management teams. Data security, backup readiness, and flexibility are built-in so your system adapts to your business rules and operational scale.",
+                "Whether you manage monthly dormitories, nightly resorts, or mixed property types, our systems are designed to be flexible, role-based, and auditable. This reduces operational risk while improving service quality for tenants and guests.",
+              ],
+              h3: [
+                {
+                  title: "Online dormitory management",
+                  body: [
+                    "Track occupancy status, renewals, payment history, and tenant records from a single dashboard. Automated notifications and structured reporting reduce mistakes and help you maintain consistent service quality.",
+                  ],
+                },
+                {
+                  title: "End-to-end resort management",
+                  body: [
+                    "For resorts and multi-room properties, we support dynamic pricing, promotions, and operational visibility across teams. The system improves guest experience while keeping management efficient and data-driven.",
+                  ],
+                },
+              ],
+            },
+            {
+              h2: "Complete company registration service",
+              intro: [
+                "SST INNOVATION also offers end-to-end company registration service. We guide you through naming, objectives, documentation, and required steps to establish your business correctly and efficiently. This reduces friction for new founders and ensures a professional start.",
+                "Our advisory team provides practical guidance on business structure, compliance, and documentation so your company begins with a solid foundation. You can focus on growth while we handle the administrative details.",
+                "From preparation to submission and follow-up, we keep the process organized and transparent. You gain clarity on legal requirements and practical business considerations, ensuring your company starts with confidence.",
+              ],
+              h3: [
+                {
+                  title: "Company registration advisory",
+                  body: [
+                    "We help you understand shareholder structure, capital requirements, and essential documentation. Our goal is to reduce risk and ensure a smooth, compliant registration process.",
+                  ],
+                },
+              ],
+            },
+            {
+              h2: "Why SST INNOVATION",
+              intro: [
+                "We operate as a full-service partner, combining strategy, design, development, and post-launch support. Our work emphasizes transparency, quality, and measurable outcomes. With experience across industries, we build systems that are both reliable and scalable.",
+                "Whether you need professional website development, a dormitory and resort management system, or a company registration service, SST INNOVATION delivers a complete solution with long-term support. We help your business grow with confidence and clarity.",
+                "Our delivery process is clear and structured, from discovery and planning to development, testing, and launch. This helps you stay informed, reduce risk, and continuously improve as business goals evolve.",
+              ],
+              h3: [
+                {
+                  title: "Professional team and after-sales support",
+                  body: [
+                    "Our multidisciplinary team ensures you receive the right advice and execution at every stage. We continue supporting you with performance tuning, security updates, and feature enhancements aligned with your business goals.",
+                  ],
+                },
+              ],
+            },
+          ],
+        };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -159,7 +326,7 @@ export default function HomePage() {
                 SST INNOVATION
               </p>
               <h1 className="font-[var(--font-heading)] text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
-                {copy.hero.title}
+                {seoContent.h1}
               </h1>
               <p className="text-lg text-blue-100">{copy.hero.subtitle}</p>
               <div className="flex flex-wrap gap-4">
@@ -205,6 +372,66 @@ export default function HomePage() {
                     : "Supabase-ready architecture with instant Vercel deployment"}
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="seo" className="bg-white py-20">
+          <div className="mx-auto w-full max-w-5xl space-y-12 px-6">
+            {seoContent.sections.map((section) => (
+              <div key={section.h2} className="space-y-6">
+                <h2 className="font-[var(--font-heading)] text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+                  {section.h2}
+                </h2>
+                {section.intro.map((paragraph) => (
+                  <p key={paragraph.slice(0, 40)} className="text-base text-slate-600">
+                    {paragraph}
+                  </p>
+                ))}
+                <div className="space-y-6">
+                  {section.h3.map((item) => (
+                    <div key={item.title} className="space-y-3">
+                      <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
+                      {item.body.map((paragraph) => (
+                        <p key={paragraph.slice(0, 40)} className="text-base text-slate-600">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="service-landing" className="bg-mist py-20">
+          <div className="mx-auto w-full max-w-6xl px-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className={eyebrowClass}>
+                  {lang === "th" ? "บริการของเรา" : "Our services"}
+                </p>
+                <h2 className="mt-3 font-[var(--font-heading)] text-3xl font-semibold tracking-tight text-slate-900">
+                  {lang === "th"
+                    ? "เส้นทางบริการเฉพาะทางสำหรับธุรกิจของคุณ"
+                    : "Specialized service paths for your business"}
+                </h2>
+                <p className="mt-3 max-w-2xl text-slate-600">
+                  {lang === "th"
+                    ? "เลือกบริการที่ตรงกับเป้าหมายของคุณ พร้อมลิงก์ไปยังรายละเอียดแบบเต็มและช่องทางติดต่อ"
+                    : "Explore each service with full details and direct contact paths."}
+                </p>
+              </div>
+              <Link
+                href="/#contact"
+                className="text-sm font-semibold text-blue-700"
+              >
+                {lang === "th" ? "ขอใบเสนอราคา" : "Request a quote"}
+              </Link>
+            </div>
+            <div className="mt-10">
+              <ServiceLinks locale={lang} />
             </div>
           </div>
         </section>
@@ -571,6 +798,81 @@ export default function HomePage() {
                 >
                   <span className="h-2 w-2 rounded-full bg-blue-600" />
                   <p className="text-sm text-slate-700">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="articles" className="bg-mist py-20">
+          <div className="mx-auto w-full max-w-6xl px-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className={eyebrowClass}>
+                  {lang === "th" ? "บทความเชิงกลยุทธ์" : "Strategic articles"}
+                </p>
+                <h2 className="mt-3 font-[var(--font-heading)] text-3xl font-semibold tracking-tight text-slate-900">
+                  {lang === "th"
+                    ? "ความรู้ที่ช่วยให้ธุรกิจตัดสินใจได้ดีขึ้น"
+                    : "Insights to support better business decisions"}
+                </h2>
+                <p className="mt-3 max-w-2xl text-slate-600">
+                  {lang === "th"
+                    ? "รวมบทความเชิงลึกเกี่ยวกับเว็บไซต์ ระบบบริหาร และการเริ่มต้นธุรกิจ พร้อมแนวทางที่นำไปใช้ได้จริง"
+                    : "Explore practical guides on websites, management systems, and business setup."}
+                </p>
+              </div>
+              <Link href="/articles" className="text-sm font-semibold text-blue-700">
+                {lang === "th" ? "ดูบทความทั้งหมด" : "View all articles"}
+              </Link>
+            </div>
+            <div className="mt-8 grid gap-6 md:grid-cols-3">
+              {[
+                {
+                  title:
+                    lang === "th"
+                      ? "แนวทางเลือกผู้พัฒนาเว็บไซต์องค์กรที่เหมาะกับธุรกิจ"
+                      : "Choosing the right corporate website partner",
+                  excerpt:
+                    lang === "th"
+                      ? "สรุปเกณฑ์สำคัญในการเลือกทีมรับทำเว็บไซต์ที่ตอบโจทย์ธุรกิจและสร้างผลลัพธ์ระยะยาว"
+                      : "Key criteria for selecting a website partner that delivers long-term value.",
+                },
+                {
+                  title:
+                    lang === "th"
+                      ? "ระบบบริหารหอพักช่วยลดต้นทุนได้อย่างไร"
+                      : "How dormitory systems reduce operational cost",
+                  excerpt:
+                    lang === "th"
+                      ? "แนวทางวางระบบที่ลดความซ้ำซ้อน เพิ่มความแม่นยำ และทำให้การบริหารโปร่งใสขึ้น"
+                      : "How structured operations improve accuracy, transparency, and efficiency.",
+                },
+                {
+                  title:
+                    lang === "th"
+                      ? "เตรียมเอกสารจดทะเบียนบริษัทให้พร้อมในครั้งเดียว"
+                      : "Preparing company registration documents correctly",
+                  excerpt:
+                    lang === "th"
+                      ? "เช็กลิสต์เอกสารและขั้นตอนสำคัญก่อนเริ่มจดทะเบียนบริษัท"
+                      : "A practical checklist of steps and documents before registration.",
+                },
+              ].map((article) => (
+                <div
+                  key={article.title}
+                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card-soft"
+                >
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    {article.title}
+                  </h3>
+                  <p className="mt-3 text-sm text-slate-600">{article.excerpt}</p>
+                  <Link
+                    href="/articles"
+                    className="mt-4 inline-flex text-sm text-blue-700"
+                  >
+                    {lang === "th" ? "อ่านต่อ" : "Read more"}
+                  </Link>
                 </div>
               ))}
             </div>

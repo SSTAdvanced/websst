@@ -8,6 +8,7 @@ type Dict = {
     services: string;
     packages: string;
     portfolio: string;
+    articles: string;
     contact: string;
   };
   hero: {
@@ -93,6 +94,7 @@ export const dict: Record<Lang, Dict> = {
       services: "บริการ",
       packages: "แพ็กเกจ",
       portfolio: "ผลงาน",
+      articles: "บทความ",
       contact: "ติดต่อ",
     },
     hero: {
@@ -283,6 +285,7 @@ export const dict: Record<Lang, Dict> = {
       services: "Services",
       packages: "Packages",
       portfolio: "Portfolio",
+      articles: "Articles",
       contact: "Contact",
     },
     hero: {

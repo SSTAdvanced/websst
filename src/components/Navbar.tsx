@@ -4,13 +4,14 @@ import { Globe, Phone } from "lucide-react";
 import type { Lang } from "@/lib/i18n";
 
 const navItems = [
-  { id: "top", key: "home" },
-  { id: "features", key: "features" },
-  { id: "platform-intro", key: "platforms" },
-  { id: "services", key: "services" },
-  { id: "package-list", key: "packages" },
-  { id: "portfolio", key: "portfolio" },
-  { id: "contact", key: "contact" },
+  { href: "#top", key: "home" },
+  { href: "#features", key: "features" },
+  { href: "#platform-intro", key: "platforms" },
+  { href: "#services", key: "services" },
+  { href: "#package-list", key: "packages" },
+  { href: "#portfolio", key: "portfolio" },
+  { href: "/articles", key: "articles" },
+  { href: "#contact", key: "contact" },
 ] as const;
 
 type NavbarProps = {
@@ -44,8 +45,8 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
         <nav className="hidden items-center gap-6 text-sm font-medium text-slate-700 lg:flex">
           {navItems.map((item) => (
             <a
-              key={item.id}
-              href={`#${item.id}`}
+              key={item.key}
+              href={item.href}
               className="transition-colors hover:text-slate-900"
             >
               {labels[item.key]}

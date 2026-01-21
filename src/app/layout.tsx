@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Thai, Noto_Serif_Thai } from "next/font/google";
-import { cookies, headers } from "next/headers";
 import Analytics from "@/components/Analytics";
 import StructuredData from "@/components/StructuredData";
+import { getRequestedLocale, type Locale } from "@/lib/locale";
 import "./globals.css";
 
 const bodyFont = Noto_Sans_Thai({
@@ -17,9 +17,6 @@ const headingFont = Noto_Serif_Thai({
   weight: ["400", "500", "600", "700"],
 });
 
-type Locale = "th" | "en";
-
-const DEFAULT_LOCALE: Locale = "th";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://websst.vercel.app";
 
 const metadataByLocale: Record<
@@ -32,41 +29,20 @@ const metadataByLocale: Record<
   }
 > = {
   th: {
-    title: "SST INNOVATION | WebCraft Pro",
+    title: "รับทำเว็บไซต์ | โปรแกรมหอพัก | จดทะเบียนบริษัท | SST INNOVATION",
     description:
-      "โซลูชันเว็บไซต์องค์กรระดับพรีเมียมโดย SST INNOVATION พร้อมรองรับการเติบโตระยะยาว",
+      "SST INNOVATION ให้บริการรับทำเว็บไซต์ระดับมืออาชีพ พัฒนาโปรแกรมบริหารหอพักและรีสอร์ท พร้อมบริการจดทะเบียนบริษัทครบวงจร ดูแลตั้งแต่เริ่มต้นจนธุรกิจเติบโต",
     ogLocale: "th_TH",
     alternateLocales: ["en_US"],
   },
   en: {
-    title: "SST INNOVATION | WebCraft Pro",
+    title: "Professional Website Development | Business Systems | SST INNOVATION",
     description:
-      "Premium enterprise website solutions by SST INNOVATION that elevate credibility and long-term growth.",
+      "SST INNOVATION provides professional website development, dormitory and resort management systems, and complete company registration services to support your business growth.",
     ogLocale: "en_US",
     alternateLocales: ["th_TH"],
   },
 };
-
-function getLocaleFromCookie(value?: string): Locale | null {
-  if (!value) return null;
-  const normalized = value.toLowerCase();
-  return normalized === "th" || normalized === "en" ? normalized : null;
-}
-
-function getLocaleFromHeader(value: string | null): Locale {
-  if (!value) return DEFAULT_LOCALE;
-  return value.toLowerCase().startsWith("en") ? "en" : "th";
-}
-
-async function getRequestedLocale(): Promise<Locale> {
-  const cookieStore = await cookies();
-  const cookieLang = cookieStore.get("lang")?.value;
-  const fromCookie = getLocaleFromCookie(cookieLang);
-  if (fromCookie) return fromCookie;
-  const headerStore = await headers();
-  const acceptLanguage = headerStore.get("accept-language");
-  return getLocaleFromHeader(acceptLanguage);
-}
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getRequestedLocale();
@@ -110,7 +86,7 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body className={`${bodyFont.variable} ${headingFont.variable} antialiased`}>
-        <StructuredData locale={locale} />
+        <StructuredData locale={locale} includeGlobal />
         <Analytics />
         {children}
       </body>
