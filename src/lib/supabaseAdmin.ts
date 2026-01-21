@@ -9,10 +9,16 @@ function requireEnv(name: string): string {
   return value;
 }
 
+// Create Supabase client only when called (does not break during build/import)
 export function getSupabaseAdmin() {
-  const supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
-  const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false },
-  });
+  try {
+    const supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
+    const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+    return createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false },
+    });
+  } catch (error) {
+    console.error("Error creating Supabase client:", error);
+    throw error; // Re-throw the error after logging
+  }
 }
