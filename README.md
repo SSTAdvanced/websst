@@ -35,6 +35,32 @@ src/
 3) Add environment variables from `.env.example` in the Vercel dashboard.
 4) Deploy.
 
+## Supabase setup
+
+Run the following SQL in your Supabase SQL editor before going live:
+
+```sql
+create table if not exists estimates (
+  id uuid primary key default gen_random_uuid(),
+  service text not null,
+  inputs jsonb not null,
+  price_min integer not null,
+  price_max integer not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists events (
+  id uuid primary key default gen_random_uuid(),
+  event_name text not null,
+  service text,
+  meta jsonb,
+  created_at timestamptz not null default now()
+);
+
+alter table leads add column if not exists service text;
+alter table leads add column if not exists estimate_id uuid references estimates(id);
+```
+
 ## Environment variables
 
 Do not commit `.env` or `.env.local` files. Use `.env.example` for reference only.

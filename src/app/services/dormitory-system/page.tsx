@@ -291,6 +291,12 @@ export default async function DormitorySystemPage() {
                 {data.cta.primary}
               </Link>
               <Link
+                href="/estimate?service=dormitory"
+                className="rounded-full border border-slate-300 px-5 py-2 text-xs font-semibold text-slate-700"
+              >
+                {locale === "th" ? "ประเมินราคา" : "Estimate price"}
+              </Link>
+              <Link
                 href="/#contact"
                 className="rounded-full border border-slate-300 px-5 py-2 text-xs font-semibold text-slate-700"
               >

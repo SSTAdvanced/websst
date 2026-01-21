@@ -1,0 +1,87 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import EstimateClient from "@/app/estimate/EstimateClient";
+import { getRequestedLocale } from "@/lib/locale";
+import { isEstimatorService } from "@/lib/estimate";
+import type { EstimatorService } from "@/lib/estimateConfig";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://websst.vercel.app";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestedLocale();
+  const title =
+    locale === "th"
+      ? "Service Estimator | SST INNOVATION"
+      : "Service Estimator | SST INNOVATION";
+  const description =
+    locale === "th"
+      ? "คำนวณช่วงราคาเบื้องต้นแบบ rule-based สำหรับเว็บไซต์ ระบบหอพัก และ analytics"
+      : "Rule-based estimator for websites, dormitory systems, and analytics.";
+  const baseUrl = SITE_URL.replace(/\/+$/, "");
+
+  return {
+    metadataBase: new URL(baseUrl),
+    title: { absolute: title },
+    description,
+    alternates: { canonical: "/estimate" },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/estimate`,
+      type: "website",
+    },
+  };
+}
+
+export default async function EstimatePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ service?: string }>;
+}) {
+  const locale = await getRequestedLocale();
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const serviceParam = resolvedSearchParams.service ?? "website";
+  const initialService: EstimatorService = isEstimatorService(serviceParam)
+    ? serviceParam
+    : "website";
+
+  return (
+    <main className="min-h-screen bg-white text-slate-900">
+      <section className="border-b border-slate-200 bg-mist py-10">
+        <div className="mx-auto w-full max-w-6xl space-y-4 px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">
+            SST INNOVATION
+          </p>
+          <h1 className="font-[var(--font-heading)] text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
+            {locale === "th" ? "Service Estimator" : "Service Estimator"}
+          </h1>
+          <p className="max-w-2xl text-base text-slate-600">
+            {locale === "th"
+              ? "ประเมินช่วงราคาเบื้องต้นก่อนตัดสินใจ พร้อมส่งข้อมูลเพื่อรับใบเสนอราคา"
+              : "Get a preliminary range and send your details for a tailored quote."}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/services"
+              className="rounded-full border border-slate-300 px-5 py-2 text-xs font-semibold text-slate-700"
+            >
+              {locale === "th" ? "ดูบริการทั้งหมด" : "View services"}
+            </Link>
+            <Link
+              href="/#contact"
+              className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white"
+            >
+              {locale === "th" ? "ปรึกษาฟรี" : "Free consultation"}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="mx-auto w-full max-w-6xl px-6">
+          <EstimateClient initialService={initialService} locale={locale} />
+        </div>
+      </section>
+    </main>
+  );
+}

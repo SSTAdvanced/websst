@@ -2,6 +2,8 @@
 
 import { Globe, Phone } from "lucide-react";
 import type { Lang } from "@/lib/i18n";
+import { trackGaEvent } from "@/lib/ga";
+import { logEvent } from "@/lib/eventLogger";
 
 const navItems = [
   { href: "#top", key: "home" },
@@ -26,6 +28,17 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
     lang === "th"
       ? "hidden items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-md transition hover:bg-slate-800 md:flex"
       : "hidden items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-md transition hover:bg-slate-800 md:flex";
+  const onNavClick = (key: (typeof navItems)[number]["key"]) => {
+    if (key !== "services") {
+      return;
+    }
+    trackGaEvent("service_click", { service: "services_menu", location: "navbar" });
+    logEvent({
+      eventName: "service_click",
+      service: "services_menu",
+      meta: { location: "navbar" },
+    });
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/40 bg-white/80 backdrop-blur">
@@ -47,6 +60,7 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
             <a
               key={item.key}
               href={item.href}
+              onClick={() => onNavClick(item.key)}
               className="transition-colors hover:text-slate-900"
             >
               {labels[item.key]}
