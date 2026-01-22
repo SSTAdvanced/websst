@@ -19,6 +19,7 @@ import Footer from "@/components/Footer";
 import PlatformCard from "@/components/PlatformCard";
 import PackageCard from "@/components/PackageCard";
 import ServiceLinks from "@/components/ServiceLinks";
+import { useMobileShell } from "@/components/MobileShellContext";
 import { getCopy, type Lang } from "@/lib/i18n";
 
 const featureIcons = [ShieldCheck, Sparkles, Award, Layers];
@@ -307,14 +308,18 @@ export default function HomePage() {
     }
   };
 
+  const mobileShellEnabled = useMobileShell();
+
   return (
     <div className="min-h-screen bg-mist text-slate-900">
-      <Navbar
-        lang={lang}
-        onToggleLang={handleToggleLang}
-        labels={copy.nav}
-        cta={copy.nav.contact}
-      />
+      {mobileShellEnabled ? null : (
+        <Navbar
+          lang={lang}
+          onToggleLang={handleToggleLang}
+          labels={copy.nav}
+          cta={copy.nav.contact}
+        />
+      )}
 
       <main id="top">
         <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-700 to-slate-900 text-white">
@@ -378,30 +383,45 @@ export default function HomePage() {
 
         <section id="seo" className="bg-white py-20">
           <div className="mx-auto w-full max-w-5xl space-y-12 px-6">
-            {seoContent.sections.map((section) => (
+            {seoContent.sections.map((section, sectionIndex) => {
+              const detailsHref =
+                sectionIndex === 0
+                  ? "/services/website"
+                  : sectionIndex === 1
+                    ? "/services/dormitory-system"
+                    : sectionIndex === 2
+                      ? "/services/company-registration"
+                      : null;
+
+              return (
               <div key={section.h2} className="space-y-6">
                 <h2 className="font-[var(--font-heading)] text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
                   {section.h2}
                 </h2>
-                {section.intro.map((paragraph) => (
+                {section.intro.slice(0, 1).map((paragraph) => (
                   <p key={paragraph.slice(0, 40)} className="text-base text-slate-600">
                     {paragraph}
                   </p>
                 ))}
-                <div className="space-y-6">
-                  {section.h3.map((item) => (
-                    <div key={item.title} className="space-y-3">
-                      <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
-                      {item.body.map((paragraph) => (
-                        <p key={paragraph.slice(0, 40)} className="text-base text-slate-600">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  ))}
-                </div>
+                {section.h3.length ? (
+                  <ul className="list-disc space-y-2 pl-5 text-base text-slate-600">
+                    {section.h3.map((item) => (
+                      <li key={item.title}>{item.title}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {detailsHref ? (
+                  <Link
+                    href={detailsHref}
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700"
+                  >
+                    {lang === "th" ? "ดูรายละเอียดบริการ" : "View full service details"}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ) : null}
               </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -472,6 +492,7 @@ export default function HomePage() {
           </div>
         </section>
 
+        {false ? (
         <section id="platform-intro" className="bg-mist py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
             <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -493,6 +514,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        ) : null}
 
         <section id="services" className="bg-white py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
@@ -531,6 +553,7 @@ export default function HomePage() {
           </div>
         </section>
 
+        <div id="packages" />
         <section id="package-list" className="bg-gradient-to-b from-white to-mist py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
             <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
