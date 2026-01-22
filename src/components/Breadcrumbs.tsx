@@ -6,7 +6,7 @@ type BreadcrumbItem = {
 };
 
 type BreadcrumbsProps = {
-  items: BreadcrumbItem[];
+  items: readonly BreadcrumbItem[];
 };
 
 export default function Breadcrumbs({ items }: BreadcrumbsProps) {
