@@ -55,8 +55,14 @@ export async function POST(req: Request) {
     } else {
       const config = estimatorConfig.analytics;
       const channels = Number(inputs.channels ?? config.minChannels);
-      const reporting = String(inputs.reporting ?? "monthly");
-      const dashboard = String(inputs.dashboard ?? "none");
+      const reportingRaw = String(inputs.reporting ?? "monthly");
+      const dashboardRaw = String(inputs.dashboard ?? "none");
+      const reporting = Object.keys(config.reportingFrequency).includes(reportingRaw)
+        ? (reportingRaw as keyof typeof config.reportingFrequency)
+        : "monthly";
+      const dashboard = Object.keys(config.dashboards).includes(dashboardRaw)
+        ? (dashboardRaw as keyof typeof config.dashboards)
+        : "none";
       estimateInputs = {
         service,
         data: {
