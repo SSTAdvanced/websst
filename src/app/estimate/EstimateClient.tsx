@@ -346,9 +346,11 @@ export default function EstimateClient({
                   value={analyticsInputs.reporting}
                   onChange={(event) => {
                     fireEstimateStart();
+                    const reporting =
+                      event.target.value as keyof typeof estimatorConfig.analytics.reportingFrequency;
                     setAnalyticsInputs({
                       ...analyticsInputs,
-                      reporting: event.target.value,
+                      reporting,
                     });
                   }}
                   className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700"
@@ -371,9 +373,11 @@ export default function EstimateClient({
                   value={analyticsInputs.dashboard}
                   onChange={(event) => {
                     fireEstimateStart();
+                    const dashboard =
+                      event.target.value as keyof typeof estimatorConfig.analytics.dashboards;
                     setAnalyticsInputs({
                       ...analyticsInputs,
-                      dashboard: event.target.value,
+                      dashboard,
                     });
                   }}
                   className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700"
