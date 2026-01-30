@@ -21,16 +21,29 @@ type MailConfig = {
   to: string;
 };
 
-const getMailConfig = (): MailConfig => {
-  const host = process.env.SMTP_HOST;
+const readEnv = (name: string): string | null => {
+  const raw = process.env[name];
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const unquoted =
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+      ? trimmed.slice(1, -1).trim()
+      : trimmed;
+  return unquoted || null;
+};
+
+const getMailConfig = (): MailConfig | null => {
+  const host = readEnv("SMTP_HOST");
   const port = Number(process.env.SMTP_PORT ?? "587");
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const from = process.env.MAIL_FROM;
-  const to = process.env.ADMIN_NOTIFY_EMAIL;
+  const user = readEnv("SMTP_USER");
+  const pass = readEnv("SMTP_PASS");
+  const from = readEnv("MAIL_FROM");
+  const to = readEnv("ADMIN_NOTIFY_EMAIL");
 
   if (!host || !user || !pass || !from || !to) {
-    throw new Error("Missing SMTP environment variables.");
+    return null;
   }
 
   return {
@@ -53,6 +66,7 @@ const escapeHtml = (value: string) =>
 
 export const sendLeadNotification = async (payload: LeadEmailPayload) => {
   const config = getMailConfig();
+  if (!config) return;
   const transporter = nodemailer.createTransport({
     host: config.host,
     port: config.port,

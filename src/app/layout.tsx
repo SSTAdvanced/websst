@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Thai, Noto_Serif_Thai } from "next/font/google";
 import Analytics from "@/components/Analytics";
+import SiteShell from "@/components/SiteShell";
 import StructuredData from "@/components/StructuredData";
 import { getRequestedLocale, type Locale } from "@/lib/locale";
 import "./globals.css";
@@ -88,7 +89,7 @@ export default async function RootLayout({
       <body className={`${bodyFont.variable} ${headingFont.variable} antialiased`}>
         <StructuredData locale={locale} includeGlobal />
         <Analytics />
-        {children}
+        <SiteShell initialLang={locale}>{children}</SiteShell>
       </body>
     </html>
   );

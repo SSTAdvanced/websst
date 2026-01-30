@@ -27,6 +27,13 @@ type StructuredDataProps = {
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://websst.vercel.app";
 
+const CONTACT = {
+  email: "sstaminno@gmail.com",
+  phoneLocal: "0843374982",
+  phoneE164: "+66843374982",
+  line: "https://line.me/R/ti/p/@974qhtym",
+} as const;
+
 const companyInfo = {
   th: {
     name: "บริษัท เอสเอสที อินโนเวชั่น จำกัด",
@@ -42,6 +49,10 @@ const companyInfo = {
   },
 };
 
+function uniqueGraphId(id: string) {
+  return id.replace(/\/+$/, "");
+}
+
 export default function StructuredData({
   locale,
   includeGlobal = false,
@@ -53,64 +64,116 @@ export default function StructuredData({
   const info = companyInfo[locale];
   const graph: Record<string, unknown>[] = [];
 
-  if (includeGlobal) {
-    graph.push(
-      {
-        "@type": "Organization",
-        "@id": `${baseUrl}/#organization`,
-        name: info.name,
-        alternateName: info.alternateName,
-        url: `${baseUrl}/`,
-        description: info.description,
-        email: "sstaminno@gmail.com",
-        telephone: "0843374982",
-        sameAs: ["https://line.me/R/ti/p/@974qhtym"],
-        contactPoint: [
-          {
-            "@type": "ContactPoint",
-            telephone: "0843374982",
-            contactType: "customer support",
-            email: "sstaminno@gmail.com",
-            availableLanguage: ["th", "en"],
-          },
-        ],
-      },
-      {
-        "@type": "LocalBusiness",
-        "@id": `${baseUrl}/#localbusiness`,
-        name: info.name,
-        alternateName: info.alternateName,
-        url: `${baseUrl}/`,
-        description: info.description,
-        telephone: "0843374982",
-        email: "sstaminno@gmail.com",
-        sameAs: ["https://line.me/R/ti/p/@974qhtym"],
-        address: {
-          "@type": "PostalAddress",
-          streetAddress:
-            "หมู่บ้านนันทนาการ์เด้นท์ 139/32 139 32 ตำบล บ้านกลาง อำเภอเมือง ปทุมธานี 12000",
-          addressCountry: "TH",
-        },
-      }
+  const organizationId = `${baseUrl}/#organization`;
+  const websiteId = `${baseUrl}/#website`;
+
+  const ensureOrganization = (mode: "minimal" | "full") => {
+    const exists = graph.some(
+      (node) => typeof node["@id"] === "string" && node["@id"] === organizationId
     );
+    if (exists) {
+      return;
+    }
+
+    const baseOrg = {
+      "@type": "Organization",
+      "@id": organizationId,
+      name: info.name,
+      alternateName: info.alternateName,
+      url: `${baseUrl}/`,
+      description: info.description,
+      email: CONTACT.email,
+      telephone: CONTACT.phoneE164,
+      sameAs: [CONTACT.line],
+    };
+
+    graph.push(
+      mode === "full"
+        ? {
+            ...baseOrg,
+            contactPoint: [
+              {
+                "@type": "ContactPoint",
+                telephone: CONTACT.phoneE164,
+                contactType: "customer support",
+                email: CONTACT.email,
+                availableLanguage: ["th", "en"],
+              },
+            ],
+          }
+        : baseOrg
+    );
+  };
+
+  if (includeGlobal) {
+    ensureOrganization("full");
+    graph.push({
+      "@type": "LocalBusiness",
+      "@id": `${baseUrl}/#localbusiness`,
+      name: info.name,
+      alternateName: info.alternateName,
+      url: `${baseUrl}/`,
+      description: info.description,
+      telephone: CONTACT.phoneE164,
+      email: CONTACT.email,
+      sameAs: [CONTACT.line],
+      areaServed: {
+        "@type": "Country",
+        name: "Thailand",
+      },
+      address: {
+        "@type": "PostalAddress",
+        streetAddress:
+          "หมู่บ้านนันทนาการ์เด้นท์ 139/32 ตำบลบ้านกลาง อำเภอเมืองปทุมธานี",
+        addressLocality: "ปทุมธานี",
+        addressRegion: "ปทุมธานี",
+        postalCode: "12000",
+        addressCountry: "TH",
+      },
+    });
+    graph.push({
+      "@type": "WebSite",
+      "@id": websiteId,
+      url: `${baseUrl}/`,
+      name: "SST INNOVATION",
+      publisher: { "@id": organizationId },
+      inLanguage: locale,
+    });
   }
 
   if (service) {
+    ensureOrganization(includeGlobal ? "full" : "minimal");
+
+    const serviceUrl = uniqueGraphId(service.url);
     graph.push({
       "@type": "Service",
-      "@id": `${service.url}#service`,
+      "@id": `${serviceUrl}#service`,
       name: service.name,
       description: service.description,
       serviceType: service.serviceType,
-      provider: { "@id": `${baseUrl}/#organization` },
-      areaServed: "TH",
-      url: service.url,
+      provider: { "@id": organizationId },
+      areaServed: {
+        "@type": "Country",
+        name: "Thailand",
+      },
+      url: serviceUrl,
     });
   }
+
+  const pageUrl =
+    uniqueGraphId(service?.url ?? breadcrumbs?.[breadcrumbs.length - 1]?.item ?? `${baseUrl}/`) ||
+    `${baseUrl}/`;
 
   if (faqs?.length) {
     graph.push({
       "@type": "FAQPage",
+      "@id": `${pageUrl}#faqpage`,
+      url: pageUrl,
+      name:
+        service?.name ??
+        (locale === "th" ? "คำถามที่พบบ่อย | SST INNOVATION" : "FAQ | SST INNOVATION"),
+      isPartOf: { "@id": websiteId },
+      inLanguage: locale,
       mainEntity: faqs.map((item) => ({
         "@type": "Question",
         name: item.question,
@@ -125,12 +188,41 @@ export default function StructuredData({
   if (breadcrumbs?.length) {
     graph.push({
       "@type": "BreadcrumbList",
+      "@id": `${pageUrl}#breadcrumb`,
       itemListElement: breadcrumbs.map((item, index) => ({
         "@type": "ListItem",
         position: index + 1,
         name: item.name,
         item: item.item,
       })),
+    });
+  }
+
+  if (service || breadcrumbs?.length || faqs?.length) {
+    ensureOrganization(includeGlobal ? "full" : "minimal");
+
+    if (includeGlobal) {
+      // `WebSite` is already included above.
+    } else {
+      graph.push({
+        "@type": "WebSite",
+        "@id": websiteId,
+        url: `${baseUrl}/`,
+        name: "SST INNOVATION",
+        publisher: { "@id": organizationId },
+        inLanguage: locale,
+      });
+    }
+
+    graph.push({
+      "@type": "WebPage",
+      "@id": `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: service?.name ?? info.name,
+      isPartOf: { "@id": websiteId },
+      about: service ? { "@id": `${uniqueGraphId(service.url)}#service` } : undefined,
+      breadcrumb: breadcrumbs?.length ? { "@id": `${pageUrl}#breadcrumb` } : undefined,
+      inLanguage: locale,
     });
   }
 

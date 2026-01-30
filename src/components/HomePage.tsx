@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Award,
@@ -13,21 +13,32 @@ import {
   Sparkles,
   Star,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import PackageCard from "@/components/PackageCard";
 import ServiceLinks from "@/components/ServiceLinks";
-import { getCopy, type Lang } from "@/lib/i18n";
+import { useLang } from "@/components/LangContext";
+import SubmitStatusModal from "@/components/SubmitStatusModal";
+import { getCopy } from "@/lib/i18n";
 
 const featureIcons = [ShieldCheck, Sparkles, Award, Layers];
 const serviceIcons = [Briefcase, Globe2, Star, MessageSquare];
 
 export default function HomePage() {
-  const [lang, setLang] = useState<Lang>("th");
+  const { lang } = useLang();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [debugRequestId, setDebugRequestId] = useState<string | null>(null);
+  const [submitModal, setSubmitModal] = useState<
+    | { open: false }
+    | {
+        open: true;
+        variant: "sending" | "success" | "error";
+        title: string;
+        message?: string;
+      }
+  >({ open: false });
+  const submitModalTimerRef = useRef<number | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -42,6 +53,41 @@ export default function HomePage() {
       window.location.hostname === "127.0.0.1");
 
   const copy = getCopy(lang);
+  const portfolioShowcase = [
+    {
+      src: "https://kyjtswuxuyqzidnxvsax.supabase.co/storage/v1/object/sign/sstinnovation/voltatechth.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8wZTI4NThhOC01MWIxLTQ0NTktYTg0My1kMjUzM2EyMTIxMTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzc3Rpbm5vdmF0aW9uL3ZvbHRhdGVjaHRoLmpwZyIsImlhdCI6MTc2OTYwMDUwOCwiZXhwIjoxODAxMTM2NTA4fQ.mqTlYZiL5qiVIZpmVmhwXEc_zs-RkY9b2C1DX5mFihc",
+      altTh: "ตัวอย่างเว็บไซต์ 1",
+      altEn: "Website example 1",
+    },
+    {
+      src: "https://kyjtswuxuyqzidnxvsax.supabase.co/storage/v1/object/sign/sstinnovation/webdesign_nack.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8wZTI4NThhOC01MWIxLTQ0NTktYTg0My1kMjUzM2EyMTIxMTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzc3Rpbm5vdmF0aW9uL3dlYmRlc2lnbl9uYWNrLmpwZyIsImlhdCI6MTc2OTYwMDUyMSwiZXhwIjoxODAxMTM2NTIxfQ.jknVEfODS-tsWy6ZC5W3iJQscqxfE3-difKO2Sx9JPE",
+      altTh: "ตัวอย่างเว็บไซต์ 2",
+      altEn: "Website example 2",
+    },
+    {
+      src: "https://kyjtswuxuyqzidnxvsax.supabase.co/storage/v1/object/sign/sstinnovation/Youngdo-Clinic.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8wZTI4NThhOC01MWIxLTQ0NTktYTg0My1kMjUzM2EyMTIxMTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzc3Rpbm5vdmF0aW9uL1lvdW5nZG8tQ2xpbmljLnBuZyIsImlhdCI6MTc2OTYwMDUzNywiZXhwIjoxODAxMTM2NTM3fQ.0oEhcTtHCUs7KaX23EdKUmFJ5lCGWaRX-QKTQq5G22k",
+      altTh: "ตัวอย่างเว็บไซต์ 3",
+      altEn: "Website example 3",
+    },
+  ] as const;
+
+  const websiteShowcase = [
+    {
+      src: "https://kyjtswuxuyqzidnxvsax.supabase.co/storage/v1/object/sign/sstinnovation/well-1024x1024.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8wZTI4NThhOC01MWIxLTQ0NTktYTg0My1kMjUzM2EyMTIxMTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzc3Rpbm5vdmF0aW9uL3dlbGwtMTAyNHgxMDI0LmpwZyIsImlhdCI6MTc2OTYyNzMzNSwiZXhwIjoxODAxMTYzMzM1fQ.59e1hhpP0j0Akxrp0vAtBWyo8MLmnJ-_OMHt3oFEdk4",
+      altTh: "ตัวอย่างเว็บไซต์องค์กร 1",
+      altEn: "Corporate website example 1",
+    },
+    {
+      src: "https://kyjtswuxuyqzidnxvsax.supabase.co/storage/v1/object/sign/sstinnovation/smdp-1024x1024.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8wZTI4NThhOC01MWIxLTQ0NTktYTg0My1kMjUzM2EyMTIxMTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzc3Rpbm5vdmF0aW9uL3NtZHAtMTAyNHgxMDI0LmpwZyIsImlhdCI6MTc2OTYyNzM1MSwiZXhwIjoxODAxMTYzMzUxfQ.MJE6p8rZaAm3-IgwDTu_2rEtLIhXcidrQw0IF4qjXn4",
+      altTh: "ตัวอย่างเว็บไซต์องค์กร 2",
+      altEn: "Corporate website example 2",
+    },
+    {
+      src: "https://kyjtswuxuyqzidnxvsax.supabase.co/storage/v1/object/sign/sstinnovation/taxi-1024x1024.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8wZTI4NThhOC01MWIxLTQ0NTktYTg0My1kMjUzM2EyMTIxMTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzc3Rpbm5vdmF0aW9uL3RheGktMTAyNHgxMDI0LmpwZyIsImlhdCI6MTc2OTYyNzM2NiwiZXhwIjoxODAxMTYzMzY2fQ.aP-Zb0ppaEBudPVwGjAqyq2oFp7rs1sREoWQU-roTSQ",
+      altTh: "ตัวอย่างเว็บไซต์องค์กร 3",
+      altEn: "Corporate website example 3",
+    },
+  ] as const;
   const eyebrowClass =
     lang === "th"
       ? "text-xs font-semibold text-blue-600"
@@ -76,6 +122,13 @@ export default function HomePage() {
       ? {
           h1: "ยกระดับธุรกิจของคุณ ด้วยเว็บไซต์และระบบบริหารธุรกิจครบวงจร",
           sections: [
+            {
+              h2: "SST INNOVATION CO., LTD.",
+              intro: [
+                "SST INNOVATION คือทีมผู้เชี่ยวชาญที่ทำงานแบบครบวงจร ตั้งแต่กลยุทธ์ดิจิทัล การออกแบบ การพัฒนา ไปจนถึงการดูแลหลังส่งมอบ เราเน้นความโปร่งใส คุณภาพ และผลลัพธ์เชิงธุรกิจของเรา และเป็นธุรกิจขนาดเล็กที่เน้นบริการที่ดี ให้บริการด้านไอทีทั้งซอฟต์แวร์ ฮาร์ดแวร์ และระบบอื่น ๆ ของเว็บไซต์ รวมถึงด้านธุรกิจอาหารและเครื่องดื่ม และรีสอร์ท/โรงแรม ครอบคลุมระบบการจองและระบบที่เกี่ยวข้องอื่น ๆ ด้วยทีมงานมืออาชีพและการดูแลหลังการขาย",
+              ],
+              h3: [],
+            },
             {
               h2: "บริการรับทำเว็บไซต์ระดับมืออาชีพ",
               intro: [
@@ -136,27 +189,18 @@ export default function HomePage() {
                 },
               ],
             },
-            {
-              h2: "ทำไมต้องเลือก SST INNOVATION",
-              intro: [
-                "SST INNOVATION คือทีมผู้เชี่ยวชาญที่ทำงานแบบครบวงจร ตั้งแต่กลยุทธ์ดิจิทัล การออกแบบ การพัฒนา ไปจนถึงการดูแลหลังส่งมอบ เราเน้นความโปร่งใส คุณภาพ และผลลัพธ์เชิงธุรกิจ ด้วยประสบการณ์จากหลากหลายอุตสาหกรรม คุณจึงมั่นใจได้ว่าทุกโครงการจะถูกวางระบบอย่างมีมาตรฐาน",
-                "ไม่ว่าคุณต้องการ รับทำเว็บไซต์ ที่ยกระดับภาพลักษณ์ ต้องการ โปรแกรมบริหารหอพัก หรือ โปรแกรมบริหารรีสอร์ท ที่ลดต้นทุนการบริหาร หรือมองหาบริการ จดทะเบียนบริษัท ที่สะดวกและถูกต้อง ทีมของเราพร้อมดูแลครบทุกขั้นตอน พร้อมให้คำปรึกษาเพื่อให้ธุรกิจของคุณเติบโตอย่างยั่งยืน",
-                "เราวางกระบวนการทำงานที่ชัดเจน ตั้งแต่การเก็บความต้องการ การเสนอแผนงาน การพัฒนาและทดสอบ ไปจนถึงการส่งมอบและติดตามผลหลังใช้งานจริง คุณจะได้รับทั้งความมั่นใจในคุณภาพ และความยืดหยุ่นในการปรับปรุงตามเป้าหมายที่เปลี่ยนแปลง",
-              ],
-              h3: [
-                {
-                  title: "ทีมงานมืออาชีพและการดูแลหลังการขาย",
-                  body: [
-                    "ทีมของเรามีทั้งนักพัฒนา นักออกแบบ และที่ปรึกษาธุรกิจ ทำให้คุณได้รับคำแนะนำที่รอบด้าน พร้อมการดูแลหลังส่งมอบที่วัดผลได้จริง ทั้งการปรับปรุงประสิทธิภาพ การอัปเดตความปลอดภัย และการพัฒนาเพิ่มเติมตามเป้าหมายธุรกิจ",
-                  ],
-                },
-              ],
-            },
           ],
         }
       : {
           h1: "Elevate your business with full-service websites and business systems",
           sections: [
+            {
+              h2: "SST INNOVATION CO., LTD.",
+              intro: [
+                "SST INNOVATION is an end-to-end expert team—from digital strategy, design, and development to post-launch support. We emphasize transparency, quality, and real business outcomes. As a small, service-minded company, we provide IT services across software, hardware, and website systems, as well as solutions for food & beverage businesses and resorts/hotels, including complete booking systems and related operational systems—backed by a professional team and after-sales support.",
+              ],
+              h3: [],
+            },
             {
               h2: "Professional website development services",
               intro: [
@@ -213,22 +257,6 @@ export default function HomePage() {
                   title: "Company registration advisory",
                   body: [
                     "We help you understand shareholder structure, capital requirements, and essential documentation. Our goal is to reduce risk and ensure a smooth, compliant registration process.",
-                  ],
-                },
-              ],
-            },
-            {
-              h2: "Why SST INNOVATION",
-              intro: [
-                "We operate as a full-service partner, combining strategy, design, development, and post-launch support. Our work emphasizes transparency, quality, and measurable outcomes. With experience across industries, we build systems that are both reliable and scalable.",
-                "Whether you need professional website development, a dormitory and resort management system, or a company registration service, SST INNOVATION delivers a complete solution with long-term support. We help your business grow with confidence and clarity.",
-                "Our delivery process is clear and structured, from discovery and planning to development, testing, and launch. This helps you stay informed, reduce risk, and continuously improve as business goals evolve.",
-              ],
-              h3: [
-                {
-                  title: "Professional team and after-sales support",
-                  body: [
-                    "Our multidisciplinary team ensures you receive the right advice and execution at every stage. We continue supporting you with performance tuning, security updates, and feature enhancements aligned with your business goals.",
                   ],
                 },
               ],
@@ -298,23 +326,77 @@ export default function HomePage() {
     }
   };
 
-  const handleToggleLang = () => {
-    const nextLang = lang === "th" ? "en" : "th";
-    setLang(nextLang);
-    if (typeof document !== "undefined") {
-      document.cookie = `lang=${nextLang}; path=/; max-age=31536000; samesite=lax`;
+  useEffect(() => {
+    if (submitModalTimerRef.current) {
+      window.clearTimeout(submitModalTimerRef.current);
+      submitModalTimerRef.current = null;
     }
-  };
+
+    if (status === "loading") {
+      setSubmitModal({
+        open: true,
+        variant: "sending",
+        title: lang === "th" ? "กำลังส่งข้อความ..." : "Sending your message...",
+        message:
+          lang === "th"
+            ? "โปรดรอสักครู่"
+            : "Please wait a moment.",
+      });
+      return;
+    }
+
+    if (status === "success") {
+      setSubmitModal({
+        open: true,
+        variant: "success",
+        title: lang === "th" ? "ส่งสำเร็จ" : "Sent successfully",
+        message:
+          lang === "th"
+            ? "ขอบคุณสำหรับการติดต่อ เราจะติดต่อกลับโดยเร็ว"
+            : "Thanks — we’ll get back to you soon.",
+      });
+      submitModalTimerRef.current = window.setTimeout(() => {
+        setSubmitModal({ open: false });
+      }, 1800);
+      return;
+    }
+
+    if (status === "error") {
+      setSubmitModal({
+        open: true,
+        variant: "error",
+        title: lang === "th" ? "ส่งไม่สำเร็จ" : "Submission failed",
+        message:
+          errorMessage ||
+          (lang === "th"
+            ? "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
+            : "Submission failed. Please try again."),
+      });
+      submitModalTimerRef.current = window.setTimeout(() => {
+        setSubmitModal({ open: false });
+      }, 3200);
+      return;
+    }
+  }, [copy.contact.success, errorMessage, lang, status]);
+
+  useEffect(() => {
+    return () => {
+      if (submitModalTimerRef.current) {
+        window.clearTimeout(submitModalTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-mist text-slate-900">
-      <Navbar
-        lang={lang}
-        onToggleLang={handleToggleLang}
-        labels={copy.nav}
-        cta={copy.nav.contact}
+    <>
+      <SubmitStatusModal
+        open={submitModal.open}
+        variant={submitModal.open ? submitModal.variant : "sending"}
+        title={submitModal.open ? submitModal.title : ""}
+        message={submitModal.open ? submitModal.message : undefined}
+        onClose={() => setSubmitModal({ open: false })}
+        closeLabel={lang === "th" ? "ตกลง" : "OK"}
       />
-
       <main id="top">
         <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-700 to-slate-900 text-white">
           <div className="absolute -left-32 top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
@@ -343,32 +425,38 @@ export default function HomePage() {
               <div className="space-y-6">
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-blue-200">
-                    Premium Stack
+                    {lang === "th" ? "เทคโนโลยีระดับพรีเมียม" : "Premium Stack"}
                   </p>
-                  <p className="mt-2 text-2xl font-semibold">Next.js + Supabase Ready</p>
+                  <p className="mt-2 text-2xl font-semibold">
+                    {lang === "th"
+                      ? "มาตรฐานสากลระดับโลก"
+                      : "Global-standard platform"}
+                  </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm text-blue-100">
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <p className="text-2xl font-semibold text-white">98%</p>
-                    <p>Performance score</p>
+                    <p>{lang === "th" ? "คะแนนประสิทธิภาพ" : "Performance score"}</p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <p className="text-2xl font-semibold text-white">24/7</p>
-                    <p>Monitoring</p>
+                    <p>{lang === "th" ? "มอนิเตอร์ 24/7" : "Monitoring"}</p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-2xl font-semibold text-white">14d</p>
-                    <p>Fast delivery</p>
+                    <p className="text-2xl font-semibold text-white">
+                      {lang === "th" ? "14 วัน" : "14d"}
+                    </p>
+                    <p>{lang === "th" ? "ส่งมอบเฉลี่ย" : "Fast delivery"}</p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-2xl font-semibold text-white">6+</p>
-                    <p>Awards</p>
+                    <p className="text-2xl font-semibold text-white">100+</p>
+                    <p>{lang === "th" ? "มาตรฐาน" : "Standards"}</p>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-blue-100">
                   {lang === "th"
-                    ? "พร้อมเชื่อมต่อ Supabase และ Deploy บน Vercel ได้ทันที"
-                    : "Supabase-ready architecture with instant Vercel deployment"}
+                    ? "ระบบครบวงจรและระดับ Supabase Deploy บน Vercel ได้ทันที"
+                    : "End-to-end Supabase system, deployable on Vercel instantly"}
                 </div>
               </div>
             </div>
@@ -378,40 +466,139 @@ export default function HomePage() {
         <section id="seo" className="bg-white py-20">
           <div className="mx-auto w-full max-w-5xl space-y-12 px-6">
             {seoContent.sections.map((section, sectionIndex) => {
+              const illustration =
+                sectionIndex === 2
+                  ? {
+                      src: "/illustrations/service-dormitory.svg",
+                      alt:
+                        lang === "th"
+                          ? "ภาพประกอบโปรแกรมบริหารหอพักและรีสอร์ท"
+                          : "Illustration: Dormitory and resort management system",
+                    }
+                  : sectionIndex === 3
+                    ? {
+                        src: "/illustrations/service-company.svg",
+                        alt:
+                          lang === "th"
+                            ? "ภาพประกอบบริการจดทะเบียนบริษัทครบวงจร"
+                          : "Illustration: Company registration service",
+                      }
+                    : null;
+              const imageOnLeft = Boolean(illustration) && sectionIndex === 2;
+
               const detailsHref =
-                sectionIndex === 0
+                sectionIndex === 1
                   ? "/services/website"
-                  : sectionIndex === 1
+                  : sectionIndex === 2
                     ? "/services/dormitory-system"
-                    : sectionIndex === 2
+                    : sectionIndex === 3
                       ? "/services/company-registration"
                       : null;
 
               return (
-              <div key={section.h2} className="space-y-6">
-                <h2 className="font-[var(--font-heading)] text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
-                  {section.h2}
-                </h2>
-                {section.intro.slice(0, 1).map((paragraph) => (
-                  <p key={paragraph.slice(0, 40)} className="text-base text-slate-600">
-                    {paragraph}
-                  </p>
-                ))}
-                {section.h3.length ? (
-                  <ul className="list-disc space-y-2 pl-5 text-base text-slate-600">
-                    {section.h3.map((item) => (
-                      <li key={item.title}>{item.title}</li>
-                    ))}
-                  </ul>
-                ) : null}
-                {detailsHref ? (
-                  <Link
-                    href={detailsHref}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700"
+              <div
+                key={section.h2}
+                className={
+                  sectionIndex === 0
+                    ? "space-y-6 text-center"
+                    : illustration
+                      ? `flex flex-col gap-6 md:items-center md:gap-10 ${
+                          imageOnLeft ? "md:flex-row" : "md:flex-row-reverse"
+                        }`
+                      : "space-y-6"
+                }
+              >
+                <div className={illustration ? "space-y-6" : undefined}>
+                  {sectionIndex === 1 ? (
+                    <div className="mb-10 md:mb-12">
+                      <div
+                        className="flex flex-col gap-4 sm:flex-row sm:items-stretch"
+                        style={{ perspective: "1200px" }}
+                      >
+                        {websiteShowcase.map((item, index) => {
+                          const tilt =
+                            index === 0 ? "-rotate-2 sm:-rotate-3" : index === 2 ? "rotate-2 sm:rotate-3" : "";
+                          const lift =
+                            index === 1 ? "sm:-translate-y-2" : "sm:translate-y-2";
+                          const scale = index === 1 ? "sm:scale-[1.02]" : "";
+                          const z = index === 1 ? "sm:z-10" : "sm:z-0";
+
+                          return (
+                            <div
+                              key={item.src}
+                              className={`group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_22px_60px_-40px_rgba(15,23,42,0.55)] transition will-change-transform sm:flex-1 ${tilt} ${lift} ${scale} ${z}`}
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-white opacity-70" />
+                              <img
+                                src={item.src}
+                                alt={lang === "th" ? item.altTh : item.altEn}
+                                className="relative block h-48 w-full object-contain p-4 sm:h-44"
+                                loading="lazy"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : null}
+                  <h2
+                    className={`font-[var(--font-heading)] text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl ${
+                      sectionIndex === 1 ? "leading-[1.5]" : ""
+                    }`}
                   >
-                    {lang === "th" ? "ดูรายละเอียดบริการ" : "View full service details"}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                    {section.h2}
+                  </h2>
+                  {section.intro.slice(0, 1).map((paragraph) => (
+                    <p
+                      key={paragraph.slice(0, 40)}
+                      className={
+                        sectionIndex === 0
+                          ? "mx-auto max-w-3xl text-base text-slate-600"
+                          : "text-base text-slate-600"
+                      }
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                  {section.h3.length ? (
+                    <ul
+                      className={
+                        sectionIndex === 0
+                          ? "mx-auto w-fit list-disc space-y-2 pl-5 text-left text-base text-slate-600"
+                          : "list-disc space-y-2 pl-5 text-base text-slate-600"
+                      }
+                    >
+                      {section.h3.map((item) => (
+                        <li key={item.title}>{item.title}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {detailsHref ? (
+                    <Link
+                      href={detailsHref}
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700"
+                    >
+                      {lang === "th" ? "ดูรายละเอียดบริการ" : "View full service details"}
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  ) : null}
+                </div>
+
+                {illustration ? (
+                  <div className="mx-auto w-full max-w-[420px] md:mx-0 md:w-[320px] md:flex-none">
+                    <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-card-soft">
+                      <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-white p-3">
+                      <Image
+                        src={illustration.src}
+                        alt={illustration.alt}
+                        width={800}
+                        height={520}
+                        className="h-auto w-full"
+                        priority={sectionIndex === 1}
+                      />
+                      </div>
+                    </div>
+                  </div>
                 ) : null}
               </div>
               );
@@ -546,38 +733,29 @@ export default function HomePage() {
 
         <section id="portfolio" className="bg-white py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
-            <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className={eyebrowClass}>{copy.nav.portfolio}</p>
-                <h2 className="mt-3 font-[var(--font-heading)] text-3xl font-semibold tracking-tight text-slate-900">
-                  {copy.portfolio.title}
-                </h2>
-                <p className="mt-3 max-w-xl text-slate-600">{copy.portfolio.subtitle}</p>
-              </div>
-              <div className="text-sm text-slate-500">
-                {lang === "th" ? "ผลงานจริงพร้อม NDA" : "Real projects under NDA"}
-              </div>
+            <div className="mb-10 text-center">
+              <p className={eyebrowClass}>{copy.nav.portfolio}</p>
+              <h2 className="mt-3 font-[var(--font-heading)] text-3xl font-semibold tracking-tight text-slate-900">
+                {lang === "th" ? "รูปแบบเว็บไซต์ตัวอย่าง" : "Website template examples"}
+              </h2>
+              <p className="mt-3 text-slate-600">
+                {lang === "th"
+                  ? "ตัวอย่างเลย์เอาต์และสไตล์เว็บไซต์ เพื่อใช้เป็นแนวทางก่อนเริ่มทำเว็บไซต์"
+                  : "Layout and style examples to help you choose a direction before we build."}
+              </p>
             </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {copy.portfolio.items.map((item, index) => (
+            <div className="grid gap-6 md:grid-cols-3">
+              {portfolioShowcase.map((item) => (
                 <div
-                  key={item.title}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card-soft transition hover:-translate-y-1 hover:shadow-xl"
+                  key={item.src}
+                  className="overflow-hidden rounded-3xl transition hover:-translate-y-1"
                 >
-                  <div
-                    className="h-44 bg-cover bg-center"
-                    style={{
-                      backgroundImage: `url(https://picsum.photos/seed/portfolio-${index + 1}/600/420)`,
-                    }}
+                  <img
+                    src={item.src}
+                    alt={lang === "th" ? item.altTh : item.altEn}
+                    className="block h-56 w-full object-cover sm:h-60 md:h-56"
+                    loading="lazy"
                   />
-                  <div className="p-5">
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                      {item.category}
-                    </p>
-                    <h3 className="mt-2 text-lg font-semibold text-slate-900">
-                      {item.title}
-                    </h3>
-                  </div>
                 </div>
               ))}
             </div>
@@ -870,8 +1048,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
-      <Footer {...copy.footer} />
-    </div>
+    </>
   );
 }

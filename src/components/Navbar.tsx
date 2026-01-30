@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from "react";
 import type { Lang } from "@/lib/i18n";
 import { trackGaEvent } from "@/lib/ga";
 import { logEvent } from "@/lib/eventLogger";
-import MobileAppNav, { isMobileAppMode } from "@/components/MobileAppNav";
 
 const navItems = [
   { href: "/#top", key: "home" },
@@ -29,44 +28,16 @@ type NavbarProps = {
   cta: string;
 };
 
-function usePlatform() {
-  const [isAppMobile] = useState(() => {
-    const ua = typeof navigator === "undefined" ? "" : navigator.userAgent ?? "";
-    const isWindows = /Windows/i.test(ua);
-    const isAndroid = /Android/i.test(ua);
-    const isIOS = /iPhone|iPad|iPod/i.test(ua);
-    return !isWindows && (isAndroid || isIOS);
-  });
-
-  return { isAppMobile };
-}
-
 export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps) {
-  const { isAppMobile } = usePlatform();
-
-  if (isAppMobile && isMobileAppMode()) {
-    return (
-      <MobileAppNav
-        lang={lang}
-        labels={labels}
-        cta={cta}
-        onToggleLang={onToggleLang}
-      />
-    );
-  }
-
   const t =
     lang === "th"
       ? {
           servicesOverview: "ภาพรวมบริการ",
           servicesWebsite: "รับทำเว็บไซต์",
-          servicesDorm: "ระบบบริหารหอพัก/รีสอร์ท",
+          servicesDorm: "ระบบหอพัก/รีสอร์ท",
           servicesCompany: "จดทะเบียนบริษัท",
-          templatesAll: "แคตตาล็อกทั้งหมด",
           templatesCorporate: "เว็บไซต์องค์กร",
           templatesEcommerce: "ร้านค้าออนไลน์",
-          templatesService: "เว็บไซต์บริการ",
-          templatesLanding: "Landing Page",
           menu: "เมนู",
           close: "ปิด",
           language: "ภาษา",
@@ -76,11 +47,8 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
           servicesWebsite: "Website Development",
           servicesDorm: "Dormitory/Resort System",
           servicesCompany: "Company Registration",
-          templatesAll: "All templates",
           templatesCorporate: "Corporate",
           templatesEcommerce: "Ecommerce",
-          templatesService: "Service",
-          templatesLanding: "Landing",
           menu: "Menu",
           close: "Close",
           language: "Language",
@@ -88,8 +56,8 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
 
   const ctaClass =
     lang === "th"
-      ? "hidden items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-md transition hover:bg-slate-800 md:flex"
-      : "hidden items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-md transition hover:bg-slate-800 md:flex";
+      ? "inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white p-2 text-slate-700 shadow-sm transition hover:border-slate-300 md:border-0 md:bg-slate-900 md:px-4 md:py-2 md:text-xs md:font-semibold md:text-white md:shadow-md md:hover:bg-slate-800"
+      : "inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white p-2 text-slate-700 shadow-sm transition hover:border-slate-300 md:border-0 md:bg-slate-900 md:px-4 md:py-2 md:text-xs md:font-semibold md:text-white md:shadow-md md:hover:bg-slate-800 md:uppercase md:tracking-[0.18em]";
 
   const onNavClick = (key: NavKey) => {
     if (key !== "services") {
@@ -123,6 +91,8 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
         setServicesOpen(false);
         setTemplatesOpen(false);
         setMobileMenuOpen(false);
+        setMobileServicesOpen(false);
+        setMobileTemplatesOpen(false);
       }
     };
 
@@ -143,6 +113,8 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
         setServicesOpen(false);
         setTemplatesOpen(false);
         setMobileMenuOpen(false);
+        setMobileServicesOpen(false);
+        setMobileTemplatesOpen(false);
       }
     };
 
@@ -153,6 +125,15 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
       document.removeEventListener("pointerdown", onPointerDown);
     };
   }, [servicesOpen, templatesOpen, mobileMenuOpen]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/40 bg-white/80 backdrop-blur">
@@ -215,14 +196,6 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
                     >
                       <Link
                         role="menuitem"
-                        href="/templates"
-                        onClick={() => setTemplatesOpen(false)}
-                        className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                      >
-                        {t.templatesAll}
-                      </Link>
-                      <Link
-                        role="menuitem"
                         href="/templates/corporate"
                         onClick={() => setTemplatesOpen(false)}
                         className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
@@ -236,22 +209,6 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
                         className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
                       >
                         {t.templatesEcommerce}
-                      </Link>
-                      <Link
-                        role="menuitem"
-                        href="/templates/service"
-                        onClick={() => setTemplatesOpen(false)}
-                        className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                      >
-                        {t.templatesService}
-                      </Link>
-                      <Link
-                        role="menuitem"
-                        href="/templates/landing"
-                        onClick={() => setTemplatesOpen(false)}
-                        className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                      >
-                        {t.templatesLanding}
                       </Link>
                     </div>
                   ) : null}
@@ -345,186 +302,204 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
             </button>
 
             {mobileMenuOpen ? (
-              <div
-                role="dialog"
-                aria-modal="true"
-                className={
-                  isAppMobile
-                    ? "fixed inset-0 z-50 bg-white"
-                    : "absolute right-0 top-full z-50 mt-3 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg"
-                }
-              >
-                <div
-                  className={
-                    isAppMobile
-                      ? "flex h-14 items-center justify-between border-b border-slate-200 px-4"
-                      : "flex items-center justify-between"
-                  }
-                >
-                  <p className="text-sm font-semibold text-slate-900">{t.menu}</p>
-                  <button
-                    type="button"
-                    aria-label={t.close}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white p-2 text-slate-700 shadow-sm transition hover:border-slate-300"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
+              <div role="dialog" aria-modal="true" className="fixed inset-0 z-50">
+                <button
+                  type="button"
+                  aria-label={t.close}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setMobileServicesOpen(false);
+                    setMobileTemplatesOpen(false);
+                  }}
+                  className="absolute inset-0 bg-black/40"
+                />
 
-                <div className={isAppMobile ? "px-4 py-4" : "pt-3"}>
-                  <div className="space-y-1">
-                    <Link
-                      href="/#top"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
-                    >
-                      {labels.home}
-                    </Link>
-                    <Link
-                      href="/#features"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
-                    >
-                      {labels.features}
-                    </Link>
-
+                <div className="absolute right-0 top-0 h-full w-[20rem] max-w-[85vw] bg-white shadow-2xl">
+                  <div className="flex h-14 items-center justify-between border-b border-slate-200 px-4">
+                    <p className="text-sm font-semibold text-slate-900">{t.menu}</p>
                     <button
                       type="button"
-                      onClick={() => setMobileServicesOpen((prev) => !prev)}
-                      className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
+                      aria-label={t.close}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setMobileServicesOpen(false);
+                        setMobileTemplatesOpen(false);
+                      }}
+                      className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white p-2 text-slate-700 shadow-sm transition hover:border-slate-300"
                     >
-                      <span>{labels.services}</span>
-                      <ChevronDown className="h-5 w-5" />
+                      <X className="h-5 w-5" />
                     </button>
-                    {mobileServicesOpen ? (
-                      <div className="space-y-1 px-3 pb-2">
-                        <Link
-                          href="/#services"
-                          onClick={() => {
-                            onNavClick("services");
-                            setMobileMenuOpen(false);
-                          }}
-                          className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                        >
-                          {t.servicesOverview}
-                        </Link>
-                        <Link
-                          href="/services/website"
-                          onClick={() => {
-                            onNavClick("services");
-                            setMobileMenuOpen(false);
-                          }}
-                          className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                        >
-                          {t.servicesWebsite}
-                        </Link>
-                        <Link
-                          href="/services/dormitory-system"
-                          onClick={() => {
-                            onNavClick("services");
-                            setMobileMenuOpen(false);
-                          }}
-                          className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                        >
-                          {t.servicesDorm}
-                        </Link>
-                        <Link
-                          href="/services/company-registration"
-                          onClick={() => {
-                            onNavClick("services");
-                            setMobileMenuOpen(false);
-                          }}
-                          className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                        >
-                          {t.servicesCompany}
-                        </Link>
-                      </div>
-                    ) : null}
+                  </div>
 
-                    <Link
-                      href="/#package-list"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
-                    >
-                      {labels.packages}
-                    </Link>
+                  <div className="h-[calc(100%-3.5rem)] overflow-y-auto px-4 py-4">
+                    <div className="space-y-1">
+                      <Link
+                        href="/#top"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setMobileServicesOpen(false);
+                          setMobileTemplatesOpen(false);
+                        }}
+                        className="block rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
+                      >
+                        {labels.home}
+                      </Link>
+                      <Link
+                        href="/#features"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setMobileServicesOpen(false);
+                          setMobileTemplatesOpen(false);
+                        }}
+                        className="block rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
+                      >
+                        {labels.features}
+                      </Link>
 
-                    <button
-                      type="button"
-                      onClick={() => setMobileTemplatesOpen((prev) => !prev)}
-                      className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
-                    >
-                      <span>{labels.portfolio}</span>
-                      <ChevronDown className="h-5 w-5" />
-                    </button>
-                    {mobileTemplatesOpen ? (
-                      <div className="space-y-1 px-3 pb-2">
-                        <Link
-                          href="/templates"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                        >
-                          {t.templatesAll}
-                        </Link>
-                        <Link
-                          href="/templates/corporate"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                        >
-                          {t.templatesCorporate}
-                        </Link>
-                        <Link
-                          href="/templates/ecommerce"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                        >
-                          {t.templatesEcommerce}
-                        </Link>
-                        <Link
-                          href="/templates/service"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                        >
-                          {t.templatesService}
-                        </Link>
-                        <Link
-                          href="/templates/landing"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
-                        >
-                          {t.templatesLanding}
-                        </Link>
-                      </div>
-                    ) : null}
-
-                    <Link
-                      href="/articles"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
-                    >
-                      {labels.articles}
-                    </Link>
-
-                    <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2">
-                      <span className="text-sm font-semibold text-slate-700">{t.language}</span>
                       <button
                         type="button"
-                        onClick={onToggleLang}
-                        className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300"
+                        onClick={() => setMobileServicesOpen((prev) => !prev)}
+                        className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
                       >
-                        {lang === "th" ? "TH" : "EN"}
+                        <span>{labels.services}</span>
+                        <ChevronDown className="h-5 w-5" />
                       </button>
-                    </div>
+                      {mobileServicesOpen ? (
+                        <div className="space-y-1 px-3 pb-2">
+                          <Link
+                            href="/services"
+                            onClick={() => {
+                              onNavClick("services");
+                              setMobileMenuOpen(false);
+                              setMobileServicesOpen(false);
+                              setMobileTemplatesOpen(false);
+                            }}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                          >
+                            {t.servicesOverview}
+                          </Link>
+                          <Link
+                            href="/services/website"
+                            onClick={() => {
+                              onNavClick("services");
+                              setMobileMenuOpen(false);
+                              setMobileServicesOpen(false);
+                              setMobileTemplatesOpen(false);
+                            }}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                          >
+                            {t.servicesWebsite}
+                          </Link>
+                          <Link
+                            href="/services/dormitory-system"
+                            onClick={() => {
+                              onNavClick("services");
+                              setMobileMenuOpen(false);
+                              setMobileServicesOpen(false);
+                              setMobileTemplatesOpen(false);
+                            }}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                          >
+                            {t.servicesDorm}
+                          </Link>
+                          <Link
+                            href="/services/company-registration"
+                            onClick={() => {
+                              onNavClick("services");
+                              setMobileMenuOpen(false);
+                              setMobileServicesOpen(false);
+                              setMobileTemplatesOpen(false);
+                            }}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                          >
+                            {t.servicesCompany}
+                          </Link>
+                        </div>
+                      ) : null}
 
-                    <Link
-                      href="/#contact"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-slate-800"
-                    >
-                      <Phone className="h-4 w-4" />
-                      {labels.contact}
-                    </Link>
+                      <Link
+                        href="/#package-list"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setMobileServicesOpen(false);
+                          setMobileTemplatesOpen(false);
+                        }}
+                        className="block rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
+                      >
+                        {labels.packages}
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => setMobileTemplatesOpen((prev) => !prev)}
+                        className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
+                      >
+                        <span>{labels.portfolio}</span>
+                        <ChevronDown className="h-5 w-5" />
+                      </button>
+                      {mobileTemplatesOpen ? (
+                        <div className="space-y-1 px-3 pb-2">
+                          <Link
+                            href="/templates/corporate"
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              setMobileServicesOpen(false);
+                              setMobileTemplatesOpen(false);
+                            }}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                          >
+                            {t.templatesCorporate}
+                          </Link>
+                          <Link
+                            href="/templates/ecommerce"
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              setMobileServicesOpen(false);
+                              setMobileTemplatesOpen(false);
+                            }}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                          >
+                            {t.templatesEcommerce}
+                          </Link>
+                        </div>
+                      ) : null}
+
+                      <Link
+                        href="/articles"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setMobileServicesOpen(false);
+                          setMobileTemplatesOpen(false);
+                        }}
+                        className="block rounded-xl px-3 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-50"
+                      >
+                        {labels.articles}
+                      </Link>
+
+                      <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2">
+                        <span className="text-sm font-semibold text-slate-700">{t.language}</span>
+                        <button
+                          type="button"
+                          onClick={onToggleLang}
+                          className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300"
+                        >
+                          {lang === "th" ? "TH" : "EN"}
+                        </button>
+                      </div>
+
+                      <Link
+                        href="/#contact"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setMobileServicesOpen(false);
+                          setMobileTemplatesOpen(false);
+                        }}
+                        className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-slate-800"
+                      >
+                        <Phone className="h-4 w-4" />
+                        {labels.contact}
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -539,9 +514,9 @@ export default function Navbar({ lang, onToggleLang, labels, cta }: NavbarProps)
             <Globe className="h-4 w-4" />
             {lang === "th" ? "TH" : "EN"}
           </button>
-          <Link href="/#contact" className={ctaClass}>
+          <Link href="/#contact" className={ctaClass} aria-label={cta}>
             <Phone className="h-4 w-4" />
-            {cta}
+            <span className="hidden md:inline">{cta}</span>
           </Link>
         </div>
       </div>
