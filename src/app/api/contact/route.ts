@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendLeadNotification } from "@/lib/email";
 
 const isValidEmail = (value: string) =>
@@ -119,6 +120,30 @@ export async function POST(req: Request) {
       );
     }
 
+    const supabase = getSupabaseAdmin();
+    const { data: lead, error: insertError } = await supabase
+      .from("leads")
+      .insert({
+        name,
+        phone: phone || null,
+        email: email || null,
+        message,
+        locale,
+        source: "website",
+      })
+      .select("id")
+      .single();
+
+    if (insertError || !lead?.id) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Lead insert failed", { requestId, insertError });
+      }
+      return NextResponse.json(
+        { ok: false, requestId, error: "Database insert failed" },
+        { status: 500 }
+      );
+    }
+
     try {
       await sendLeadNotification({
         name,
@@ -132,7 +157,7 @@ export async function POST(req: Request) {
       // Ignore email failures to keep lead submit UX reliable (env may be unset in dev).
     }
 
-    return NextResponse.json({ ok: true, requestId });
+    return NextResponse.json({ ok: true, requestId, leadId: lead.id });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error({ requestId, error: err });
