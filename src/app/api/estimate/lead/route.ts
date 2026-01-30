@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendLeadNotification } from "@/lib/email";
+import { notifyLineViaCloudflare } from "@/lib/lineWebhook";
 import { isEstimatorService } from "@/lib/estimate";
 
 const isValidEmail = (value: string) =>
@@ -130,18 +131,22 @@ export async function POST(req: Request) {
     }
 
     const supabaseAdmin = getSupabaseAdmin();
-    const { error } = await supabaseAdmin.from("leads").insert([
-      {
-        name,
-        phone,
-        email,
-        message,
-        locale,
-        source: "estimate",
-        service,
-        estimate_id: estimateId,
-      },
-    ]);
+    const { data: lead, error } = await supabaseAdmin
+      .from("leads")
+      .insert([
+        {
+          name,
+          phone,
+          email,
+          message,
+          locale,
+          source: "estimate",
+          service,
+          estimate_id: estimateId,
+        },
+      ])
+      .select("id")
+      .single();
 
     if (error) {
       console.error({ requestId, error });
@@ -180,7 +185,30 @@ export async function POST(req: Request) {
       console.error("Lead email notification failed:", emailError);
     }
 
-    return NextResponse.json({ ok: true, requestId });
+    if (lead?.id) {
+      try {
+        const estimateLine =
+          priceMin && priceMax
+            ? `Estimate range: ${priceMin} - ${priceMax}`
+            : "Estimate range: -";
+        await notifyLineViaCloudflare({
+          leadId: lead.id,
+          name,
+          phone: phone || null,
+          email: email || null,
+          message: `${message}\n${estimateLine}`,
+          locale,
+          source: `estimate:${service ?? "unknown"}`,
+          requestId,
+        });
+      } catch (lineError) {
+        if (process.env.NODE_ENV !== "production") {
+          console.error("Line webhook notification failed", { requestId, lineError });
+        }
+      }
+    }
+
+    return NextResponse.json({ ok: true, requestId, leadId: lead?.id ?? null });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error({ requestId, error: err });

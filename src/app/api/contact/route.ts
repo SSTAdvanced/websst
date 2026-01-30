@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendLeadNotification } from "@/lib/email";
+import { notifyLineViaCloudflare } from "@/lib/lineWebhook";
 
 const isValidEmail = (value: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -155,6 +156,23 @@ export async function POST(req: Request) {
       });
     } catch {
       // Ignore email failures to keep lead submit UX reliable (env may be unset in dev).
+    }
+
+    try {
+      await notifyLineViaCloudflare({
+        leadId: lead.id,
+        name,
+        phone: phone || null,
+        email: email || null,
+        message,
+        locale,
+        source: "website",
+        requestId,
+      });
+    } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Line webhook notification failed", { requestId, error });
+      }
     }
 
     return NextResponse.json({ ok: true, requestId, leadId: lead.id });
