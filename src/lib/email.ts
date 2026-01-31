@@ -19,6 +19,7 @@ type MailConfig = {
   pass: string;
   from: string;
   to: string;
+  requireTls: boolean;
 };
 
 const readEnv = (name: string): string | null => {
@@ -36,7 +37,11 @@ const readEnv = (name: string): string | null => {
 
 const getMailConfig = (): MailConfig | null => {
   const host = readEnv("SMTP_HOST");
-  const port = Number(process.env.SMTP_PORT ?? "587");
+  const portRaw = readEnv("SMTP_PORT") ?? "587";
+  const port = Number.parseInt(portRaw, 10);
+  if (!Number.isFinite(port)) {
+    return null;
+  }
   const user = readEnv("SMTP_USER");
   const pass = readEnv("SMTP_PASS");
   const from = readEnv("MAIL_FROM");
@@ -54,6 +59,7 @@ const getMailConfig = (): MailConfig | null => {
     pass,
     from,
     to,
+    requireTls: port !== 465,
   };
 };
 
@@ -75,6 +81,7 @@ export const sendLeadNotification = async (
     host: config.host,
     port: config.port,
     secure: config.secure,
+    requireTLS: config.requireTls,
     auth: { user: config.user, pass: config.pass },
   });
 
